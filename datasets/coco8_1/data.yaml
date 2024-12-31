@@ -1,0 +1,14 @@
+path: D:\YOLOv8-Based_Printed_Circuit_Board_Defect_Detection_System\datasets\coco8_1
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 6
+names: ['missing_hole', 'mouse_bite', 'open_circuit', 'short', 'spur', 'spurious_copper']
+
+roboflow:
+  workspace: pcbdefect-eftc9
+  project: pcb-defect-djz4r
+  version: 3
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/pcbdefect-eftc9/pcb-defect-djz4r/dataset/3

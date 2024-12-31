@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCB Defect Detection</title>
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h2>Upload PCB Image for Defect Detection</h2>
+        <form id="uploadForm" onsubmit="uploadImage(event)">
+            <input type="file" id="fileInput" name="file" accept="image/*" onchange="previewImage()" required>
+            <button type="submit">Detect Defects</button>
+        </form>
+        <div id="imagesContainer">
+            <div class="image-wrapper">
+                <h3>Original Image</h3>
+                <img id="originalImage" src="./static/uploads/original_image.jpg" alt="Original Image">
+            </div>
+            <div class="image-wrapper">
+                <h3>Detection Result</h3>
+                <img id="resultImage" src="./static/results/result_image.jpg" alt="Detection Result">
+            </div>
+        </div>
+        <div class="error" id="errorContainer"></div>
+    </div>
+
+    <script>
+        let selectedImageFilename = "";  // 儲存圖片的檔名
+
+        function previewImage() {
+            const fileInput = document.getElementById('fileInput');
+            const originalImage = document.getElementById('originalImage');
+            
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    originalImage.src = e.target.result; // 顯示選擇的圖片
+                    // selectedImageFilename = fileInput.files[0].name;  // 儲存檔案名稱
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+
+        function uploadImage(event) {
+            event.preventDefault(); // 防止表單提交刷新頁面
+
+            const fileInput = document.getElementById('fileInput');
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            document.getElementById('errorContainer').textContent = '';
+
+            fetch("http://127.0.0.1:5000/upload", {
+                method: "POST",
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.image_url) {
+                    // 顯示檢測結果
+                    const resultImage = document.getElementById('resultImage');
+                    const timestamp = new Date().getTime();
+                    resultImage.src = data.image_url + '?t=' + timestamp; // 防止快取
+
+                    // 顯示來自本地端的原始圖片
+                    const originalImage = document.getElementById('originalImage');
+                    originalImage.src = '/static/uploads/original_image.jpg' + '?t=' + timestamp;  // 使用本地儲存的檔案
+                } else {
+                    document.getElementById('errorContainer').textContent = "Error: " + data.error;
+                }
+            })
+            .catch(error => {
+                console.error("Error uploading image:", error);
+                document.getElementById('errorContainer').textContent = "An error occurred. Please try again.";
+            });
+        }
+    </script>
+</body>
+</html>
